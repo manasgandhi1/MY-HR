@@ -6,12 +6,12 @@ import { supabase } from "../lib/supabase";
 type EmployeeRow = {
   id: number | string;
   created_at: string | null;
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-  date_of_joining: string | null;
-  status: string | null;
-  mobile: string | null;
+  first_name: string | null;       // "First name"
+  last_name: string | null;        // "Last name"
+  email: string | null;            // "Email ID"
+  date_of_joining: string | null;  // "Date of Joining"
+  status: string | null;           // Status
+  mobile: string | null;           // "Mobile number"
 };
 
 export default function Page() {
@@ -24,10 +24,8 @@ export default function Page() {
       setLoading(true);
       setErrorMsg(null);
 
-      // Map quoted Postgres column names -> JS-friendly aliases
-      // syntax: alias:"Quoted Column Name"
       const { data, error } = await supabase
-        .from("Employee")
+        .from<EmployeeRow>("Employee") // 👈 type the table rows
         .select(
           [
             "id",
@@ -45,13 +43,17 @@ export default function Page() {
       if (error) {
         setErrorMsg(error.message);
       } else {
-        setRows((data as EmployeeRow[]) ?? []);
+        setRows(data ?? []);
       }
+
       setLoading(false);
     };
 
     run();
   }, []);
+
+  const fmtDate = (iso?: string | null) =>
+    iso ? new Date(iso).toLocaleDateString() : "";
 
   return (
     <main className="p-8">
@@ -69,13 +71,13 @@ export default function Page() {
               <table className="min-w-[900px] w-full text-sm">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="p-2 border">ID</th>
-                    <th className="p-2 border">First name</th>
-                    <th className="p-2 border">Last name</th>
-                    <th className="p-2 border">Email</th>
-                    <th className="p-2 border">Mobile</th>
-                    <th className="p-2 border">Status</th>
-                    <th className="p-2 border">Date of Joining</th>
+                    <th className="p-2 border text-left">ID</th>
+                    <th className="p-2 border text-left">First name</th>
+                    <th className="p-2 border text-left">Last name</th>
+                    <th className="p-2 border text-left">Email</th>
+                    <th className="p-2 border text-left">Mobile</th>
+                    <th className="p-2 border text-left">Status</th>
+                    <th className="p-2 border text-left">Date of Joining</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -87,11 +89,7 @@ export default function Page() {
                       <td className="p-2 border">{r.email ?? ""}</td>
                       <td className="p-2 border">{r.mobile ?? ""}</td>
                       <td className="p-2 border">{r.status ?? ""}</td>
-                      <td className="p-2 border">
-                        {r.date_of_joining
-                          ? new Date(r.date_of_joining).toLocaleDateString()
-                          : ""}
-                      </td>
+                      <td className="p-2 border">{fmtDate(r.date_of_joining)}</td>
                     </tr>
                   ))}
                 </tbody>
